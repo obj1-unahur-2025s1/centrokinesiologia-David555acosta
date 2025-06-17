@@ -8,8 +8,12 @@ class Paciente {
 
   method aumentarFortalezaMuscular(cantidad) {fortalezaMuscular += cantidad}
 
+  method pacientePuedeUsarElAparato(aparato) = aparato.puedeSerUsado(self) 
+
   method usarAparato(aparato) {
-    if (aparato.puedeSerUsado(self)) {
+    if (!self.pacientePuedeUsarElAparato(aparato)) {
+      self.error("El paciente no puede usar el aparato")
+    } else {
       aparato.tratamiento(self)
     }
   }
@@ -28,12 +32,26 @@ class Resistente inherits Paciente {
 }
 
 class Caprichoso inherits Paciente {
+  override method usarAparato(aparato) {
+    if (aparatos.any({a => a.color() == "rojo"})) {
+      aparato.tratamiento(self)
+      aparato.tratamiento(self)
+    }
+  }
+}
 
+class RapidaRecuperacion inherits Paciente {
+  var property cantidadConfigurable = 3
+  override method realizarSesionCompleta() {
+    super()
+    self.disminuirDolor(cantidadConfigurable)
+  }
 }
 
 
 class Magneto {
   var color = "blanco"
+  method color() = color 
   method puedeSerUsado(paciente) = true
   var puntos = 0
   method puntos() = puntos
@@ -69,4 +87,13 @@ class Minitramp {
     paciente.aumentarFortalezaMuscular(paciente.edad() * 0.10)
     puntos += 0
   } 
+}
+
+object centro {
+  const property aparatosDelCentro = []
+  const property pacientesTotales = []
+
+  method aparatosSinRepetidos() = aparatosDelCentro.asList().map({a => a.color()})
+  method pacientesMenoresA8Años() = pacientesTotales.asList().filter({a => a.edad() < 8 })
+  method cantidadPacientesQueNoCumplenSesion() = pacientesTotales.count({ p => not p.puedeUsarTodosLosAparartos()})  
 }
